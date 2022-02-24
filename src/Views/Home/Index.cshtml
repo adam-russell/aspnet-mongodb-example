@@ -1,0 +1,161 @@
+﻿@{
+    ViewData["Title"] = "ASP.NET MongoDB Example";
+}
+
+<div id="app" v-cloak>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center">
+                <button v-if="!showAddingSpinner" class="btn btn-primary mb-2" v-on:click="addTodo" type="button">Add</button>
+                <button v-if="showAddingSpinner" class="btn btn-primary mb-2" type="button" disabled>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Adding...
+                </button>
+
+                <div v-if="showSpinner" class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+            </div>
+
+            <p v-if="todos == null || todos.length < 1"><em>No Todo items.  Click <strong>Add</strong> to add one.</em></p>
+
+            <slick-list v-if="todos.length > 0" lock-axis="y" v-model:list="todos" tag="ul" class="slick-list" helper-class="slick-stylizedHelper" v-on:input="afterSort">
+                <slick-item v-for="(todo, index) in todos" :index="index" :key="todo" tag="li" class="slick-list-item">
+                    @*Uncomment line below if you want a handle for the list*@
+                    @*<span v-handle class="slick-handle"></span>*@
+
+                    <button type="button" class="btn me-2" title="Mark Done" v-on:click="markDone(todo)">
+                        <i v-if="!todo.done" class="far fa-circle fs-2 no-pointer-events"></i>
+                        <i v-if="todo.done" class="fas fa-check-circle fs-2 no-pointer-events text-success"></i>
+                    </button>
+
+                    <label class="visually-hidden" v-bind:for="'todo-' + index">Todo</label>
+                    <input v-bind:class="'form-control' + ((todo.done) ? ' text-decoration-line-through': '')" type="text" placeholder="E.g., pick up the milk" v-bind:id="'todo-' + index" v-bind:name="'todo-' + index" v-model.trim="todo.name" v-on:blur="nameBlur(todo)">
+
+                    <button type="button" class="btn btn-light ms-2" title="Delete Todo Item" v-on:click="deleteTodo(todo)"><i class="far fa-times no-pointer-events"></i></button>
+
+                </slick-item>
+            </slick-list>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+<script src="https://unpkg.com/axios@0.26.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+<script src="https://unpkg.com/vue-slicksort@1.2.0/dist/vue-slicksort.min.js"></script>
+
+<script>
+    var { SlickList, SlickItem, HandleDirective } = window.VueSlicksort;
+
+    Vue.component('slick-list', SlickList);
+    Vue.component('slick-item', SlickItem);
+
+    const app = new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                todos: [],
+                showSpinner: false,
+                showAddingSpinner: false
+            }
+        },
+        mounted: function () {
+            this.loadTodoItems();
+        },
+        methods: {
+            nameBlur: function (todo) {
+                this.updateTodo(todo);
+            },
+            addTodo: async function () {
+                try {
+                    this.showAddingSpinner = true;
+
+                    let newTodo = @Html.Raw(Json.Serialize(new Todo()));
+
+                    const response = await axios.post('/api/todo',
+                        JSON.stringify(newTodo), {
+                            headers: {
+                                'Content-Type': 'application/json; charset=utf-8'
+                            }
+                        });
+
+                    this.todos.push(response.data);
+
+                    /* Focus the newly added input on the next tick */
+                    this.$nextTick(() => {
+                        var el = document.getElementById('todo-' + (this.todos.length - 1));
+                        if (el) {
+                            el.focus();
+                        }
+                    });
+                } catch (error) {
+                    alert(error);
+                } finally {
+                    this.showAddingSpinner = false;
+                }
+            },
+            markDone: function (todo) {
+                todo.done = !todo.done;
+                this.updateTodo(todo);
+            },
+            afterSort: async function () {
+                /* We're updating the order of the items below */
+                try {
+                    this.showSpinner = true;
+                    const response = await axios.put('/api/todo/order',
+                        JSON.stringify(this.todos), {
+                            headers: {
+                                'Content-Type': 'application/json; charset=utf-8'
+                            }
+                        });
+                } catch (error) {
+                    alert(error);
+                } finally {
+                    this.showSpinner = false;
+                }
+            },
+            updateTodo: async function (todo) {
+                try {
+                    this.showSpinner = true;
+                    const response = await axios.put('/api/todo/' + todo.id,
+                        JSON.stringify(todo), {
+                            headers: {
+                                'Content-Type': 'application/json; charset=utf-8'
+                            }
+                        });
+                } catch (error) {
+                    alert(error);
+                } finally {
+                    this.showSpinner = false;
+                }
+            },
+            deleteTodo: async function (todo) {
+                if (!confirm('Are you sure you want to delete this todo?')) {
+                    return;
+                }
+
+                try {
+                    this.showSpinner = true;
+                    const response = await axios.delete('/api/todo/' + todo.id);
+                    this.todos.splice(this.todos.indexOf(todo), 1);
+                } catch (error) {
+                    alert(error);
+                } finally {
+                    this.showSpinner = false;
+                }
+            },
+            loadTodoItems: async function () {
+                try {
+                    this.showSpinner = true;
+                    const response = await axios.get('/api/todo/list');
+                    this.todos = response.data;
+                } catch (error) {
+                    alert(error);
+                } finally {
+                    this.showSpinner = false;
+                }
+            },
+        }
+    });
+</script>
+}

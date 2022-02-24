@@ -1,0 +1,80 @@
+﻿.no-pointer-events {
+    pointer-events: none;
+}
+
+[v-cloak] {
+    display: none !important;
+}
+
+    [v-cloak]::before {
+        content: "Loading..."
+    }
+
+/* Vue Slicksort */
+.slick-list, pre {
+    width: 100%;
+}
+
+.slick-list {
+    max-height: calc(100vh - 180px);
+    padding: 0;
+    overflow: auto;
+    background-color: #f3f3f3;
+    border: 1px solid #efefef;
+    border-radius: 3px;
+}
+
+.slick-list-item {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    width: 100%;
+    padding: 12px;
+    background-color: #fdfdfd;
+    border-bottom: 1px solid #efefef;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: #333;
+    font-weight: 400
+}
+
+.slick-handle {
+    display: block;
+    width: 18px;
+    height: 18px;
+    background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><path d="M0 7.5v5h50v-5H0zm0 15v5h50v-5H0zm0 15v5h50v-5H0z" color="%23000"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: .25;
+    margin-right: 20px;
+    cursor: row-resize
+}
+
+.slick-stylizedHelper {
+    box-shadow: 0 10px 20px rgba(0,0,0,.2);
+    background-color: rgba(31,136,255,.8);
+    color: #fff;
+    cursor: row-resize;
+    border: 1px solid #fff
+}
+
+    .slick-stylizedHelper.horizontalItem {
+        cursor: col-resize
+    }
+
+    .slick-stylizedHelper.gridItem {
+        background-color: transparent;
+        white-space: nowrap;
+        box-shadow: none
+    }
+
+        .slick-stylizedHelper.gridItem .wrapper {
+            background-color: hsla(0,0%,100%,.8);
+            box-shadow: 0 0 7px rgba(0,0,0,.15)
+        }
